@@ -1,4 +1,5 @@
-﻿using BeautySalonApi.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using BeautySalonApi.Contracts;
 using BeautySalonApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,62 +9,92 @@ namespace BeautySalonApi.Controllers;
 [ApiController]
 [Route("api/employees")]
 [Authorize]
-public class EmployeesController : ControllerBase
+public class EmployeesController(EmployeeService service) : ControllerBase
 {
-    private readonly EmployeeService _employeeService;
-
-    public EmployeesController(EmployeeService employeeService)
-    {
-        _employeeService = employeeService;
-    }
-
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<ActionResult<List<EmployeeResponse>>> GetAll()
     {
-        var result = await _employeeService.GetAll();
-        return Ok(result);
+        return Ok(await service.GetAll());
     }
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<EmployeeResponse>> GetById(int id)
     {
-        var result = await _employeeService.GetById(id);
-        if (result == null)
-            return NotFound();
-
-        return Ok(result);
+        try
+        {
+            return Ok(await service.GetById(id));
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
 
     [HttpPost]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Create([FromBody] Employee employee)
+    public async Task<ActionResult<EmployeeResponse>> Create(
+        EmployeeRequest request)
     {
         try
         {
-            var result = await _employeeService.Create(employee);
-            return Ok(result);
+            var result = await service.Create(request);
+
+            return CreatedAtAction(
+                nameof(GetById),
+                new { id = result.Id },
+                result);
         }
-        catch (ArgumentException ex)
+        catch (ValidationException ex)
         {
             return BadRequest(ex.Message);
         }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("{id:int}")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Update(int id, [FromBody] Employee employee)
+    public async Task<IActionResult> Update(
+        int id,
+        EmployeeRequest request)
     {
-        if (id != employee.Id)
-            return BadRequest();
-
         try
         {
-            await _employeeService.Update(employee);
+            await service.Update(id, request);
             return NoContent();
         }
-        catch (KeyNotFoundException)
+        catch (KeyNotFoundException ex)
         {
-            return NotFound();
+            return NotFound(ex.Message);
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
+        }
+    }
+
+    [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        try
+        {
+            await service.Delete(id);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(ex.Message);
         }
     }
 }

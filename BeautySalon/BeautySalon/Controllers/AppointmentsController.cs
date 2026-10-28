@@ -1,4 +1,5 @@
-﻿using BeautySalonApi.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using BeautySalonApi.Contracts;
 using BeautySalonApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,62 +9,81 @@ namespace BeautySalonApi.Controllers;
 [ApiController]
 [Route("api/appointments")]
 [Authorize]
-public class AppointmentsController : ControllerBase
+public class AppointmentsController(AppointmentService service)
+    : ControllerBase
 {
-    private readonly AppointmentService _appointmentService;
-
-    public AppointmentsController(AppointmentService appointmentService)
-    {
-        _appointmentService = appointmentService;
-    }
-
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<ActionResult<List<AppointmentResponse>>> GetAll()
     {
-        var result = await _appointmentService.GetAll();
-        return Ok(result);
+        return Ok(await service.GetAll());
     }
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    [HttpGet("{id:int}")]
+    public async Task<ActionResult<AppointmentResponse>> GetById(int id)
     {
-        var result = await _appointmentService.GetById(id);
-        if (result == null)
-            return NotFound();
-
-        return Ok(result);
+        try
+        {
+            return Ok(await service.GetById(id));
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
     }
 
     [HttpPost]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Create([FromBody] Appointment appointment)
+    public async Task<ActionResult<AppointmentResponse>> Create(
+        AppointmentRequest request)
     {
         try
         {
-            var result = await _appointmentService.Create(appointment);
-            return Ok(result);
+            var result = await service.Create(request);
+
+            return CreatedAtAction(
+                nameof(GetById),
+                new { id = result.Id },
+                result);
         }
-        catch (ArgumentException ex)
+        catch (ValidationException ex)
         {
             return BadRequest(ex.Message);
         }
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("{id:int}")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Update(int id, [FromBody] Appointment appointment)
+    public async Task<IActionResult> Update(
+        int id,
+        AppointmentRequest request)
     {
-        if (id != appointment.Id)
-            return BadRequest();
-
         try
         {
-            await _appointmentService.Update(appointment);
+            await service.Update(id, request);
             return NoContent();
         }
-        catch (KeyNotFoundException)
+        catch (KeyNotFoundException ex)
         {
-            return NotFound();
+            return NotFound(ex.Message);
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        try
+        {
+            await service.Delete(id);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(ex.Message);
         }
     }
 }

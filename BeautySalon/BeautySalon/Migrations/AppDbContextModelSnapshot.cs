@@ -167,7 +167,7 @@ namespace BeautySalon.Migrations
                     b.HasOne("BeautySalonApi.Models.Client", "Client")
                         .WithMany()
                         .HasForeignKey("ClientId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("BeautySalonApi.Models.Employee", "Employee")
@@ -194,7 +194,7 @@ namespace BeautySalon.Migrations
                     b.HasOne("BeautySalonApi.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");

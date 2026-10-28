@@ -1,68 +1,118 @@
-﻿using BeautySalonApi.Data;
+﻿using System.ComponentModel.DataAnnotations;
+using BeautySalonApi.Contracts;
+using BeautySalonApi.Data;
 using BeautySalonApi.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace BeautySalonApi.Services;
 
-public class EmployeeService
+public class EmployeeService(AppDbContext context)
 {
-    private readonly AppDbContext _context;
-
-    public EmployeeService(AppDbContext context)
+    public async Task<List<EmployeeResponse>> GetAll()
     {
-        _context = context;
-    }
-
-    public async Task<List<object>> GetAll()
-    {
-        return await _context.Employees
-            .Select(e => new
-            {
-                e.Id,
-                e.FirstName,
-                e.LastName,
-                e.Phone
-            })
-            .Cast<object>()
+        return await context.Employees
+            .AsNoTracking()
+            .OrderBy(e => e.Id)
+            .Select(e => new EmployeeResponse(
+                e.Id, e.UserId, e.FirstName, e.LastName, e.Phone))
             .ToListAsync();
     }
 
-    public async Task<Employee?> GetById(int id)
+    public async Task<EmployeeResponse> GetById(int id)
     {
-        return await _context.Employees
-            .FirstOrDefaultAsync(e => e.Id == id);
+        var employee = await context.Employees
+            .AsNoTracking()
+            .SingleOrDefaultAsync(e => e.Id == id)
+            ?? throw new KeyNotFoundException("Employee not found.");
+
+        return ToResponse(employee);
     }
 
-    public async Task<Employee> Create(Employee employee)
+    public async Task<EmployeeResponse> Create(EmployeeRequest request)
     {
+        Validator.ValidateObject(
+            request, new ValidationContext(request), true);
+
+        if (!await context.Users.AnyAsync(u => u.Id == request.UserId))
+            throw new ValidationException("The specified user does not exist.");
+
+        if (await context.Employees.AnyAsync(e => e.UserId == request.UserId))
+        {
+            throw new InvalidOperationException(
+                "This user is already linked to an employee.");
+        }
+
+        var employee = new Employee
+        {
+            UserId = request.UserId,
+            FirstName = request.FirstName.Trim(),
+            LastName = request.LastName.Trim(),
+            Phone = request.Phone.Trim()
+        };
+
         if (!employee.IsValid())
-            throw new ArgumentException("Invalid employee data.");
+            throw new ValidationException("Invalid employee data.");
 
-        _context.Employees.Add(employee);
-        await _context.SaveChangesAsync();
-        return employee;
+        context.Employees.Add(employee);
+        await context.SaveChangesAsync();
+
+        return ToResponse(employee);
     }
 
-    public async Task Update(Employee employee)
+    public async Task Update(int id, EmployeeRequest request)
     {
-        var current = await _context.Employees.FindAsync(employee.Id);
-        if (current == null)
-            throw new KeyNotFoundException();
+        Validator.ValidateObject(
+            request, new ValidationContext(request), true);
 
-        current.FirstName = employee.FirstName;
-        current.LastName = employee.LastName;
-        current.Phone = employee.Phone;
+        var employee = await context.Employees
+            .SingleOrDefaultAsync(e => e.Id == id)
+            ?? throw new KeyNotFoundException("Employee not found.");
 
-        await _context.SaveChangesAsync();
+        if (!await context.Users.AnyAsync(u => u.Id == request.UserId))
+            throw new ValidationException("The specified user does not exist.");
+
+        if (await context.Employees.AnyAsync(
+            e => e.UserId == request.UserId && e.Id != id))
+        {
+            throw new InvalidOperationException(
+                "This user is already linked to another employee.");
+        }
+
+        employee.UserId = request.UserId;
+        employee.FirstName = request.FirstName.Trim();
+        employee.LastName = request.LastName.Trim();
+        employee.Phone = request.Phone.Trim();
+
+        if (!employee.IsValid())
+            throw new ValidationException("Invalid employee data.");
+
+        await context.SaveChangesAsync();
     }
 
     public async Task Delete(int id)
     {
-        var employee = await _context.Employees.FindAsync(id);
-        if (employee == null)
-            throw new KeyNotFoundException();
+        var employee = await context.Employees
+            .SingleOrDefaultAsync(e => e.Id == id)
+            ?? throw new KeyNotFoundException("Employee not found.");
 
-        _context.Employees.Remove(employee);
-        await _context.SaveChangesAsync();
+        if (await context.Appointments.AnyAsync(a => a.EmployeeId == id))
+        {
+            throw new InvalidOperationException(
+                "Cannot delete an employee who has appointments. " +
+                "Delete the appointments first.");
+        }
+
+        context.Employees.Remove(employee);
+        await context.SaveChangesAsync();
+    }
+
+    private static EmployeeResponse ToResponse(Employee employee)
+    {
+        return new EmployeeResponse(
+            employee.Id,
+            employee.UserId,
+            employee.FirstName,
+            employee.LastName,
+            employee.Phone);
     }
 }

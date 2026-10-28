@@ -1,66 +1,93 @@
-﻿using BeautySalonApi.Data;
+﻿using System.ComponentModel.DataAnnotations;
+using BeautySalonApi.Contracts;
+using BeautySalonApi.Data;
 using BeautySalonApi.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace BeautySalonApi.Services;
 
-public class ServiceService
+public class ServiceService(AppDbContext context)
 {
-    private readonly AppDbContext _context;
-
-    public ServiceService(AppDbContext context)
+    public async Task<List<ServiceResponse>> GetAll()
     {
-        _context = context;
-    }
-
-    public async Task<List<object>> GetAll()
-    {
-        return await _context.Services
-            .Select(s => new
-            {
-                s.Id,
-                s.ServiceName,
-                s.BasePrice
-            })
-            .Cast<object>()
+        return await context.Services
+            .AsNoTracking()
+            .OrderBy(s => s.Id)
+            .Select(s => new ServiceResponse(
+                s.Id, s.ServiceName, s.BasePrice))
             .ToListAsync();
     }
 
-    public async Task<Service?> GetById(int id)
+    public async Task<ServiceResponse> GetById(int id)
     {
-        return await _context.Services
-            .FirstOrDefaultAsync(s => s.Id == id);
+        var service = await context.Services
+            .AsNoTracking()
+            .SingleOrDefaultAsync(s => s.Id == id)
+            ?? throw new KeyNotFoundException("Service not found.");
+
+        return ToResponse(service);
     }
 
-    public async Task<Service> Create(Service service)
+    public async Task<ServiceResponse> Create(ServiceRequest request)
     {
+        Validator.ValidateObject(
+            request, new ValidationContext(request), true);
+
+        var service = new Service
+        {
+            ServiceName = request.ServiceName.Trim(),
+            BasePrice = request.BasePrice
+        };
+
         if (!service.IsValid())
-            throw new ArgumentException("Invalid service data.");
+            throw new ValidationException("Invalid service data.");
 
-        _context.Services.Add(service);
-        await _context.SaveChangesAsync();
-        return service;
+        context.Services.Add(service);
+        await context.SaveChangesAsync();
+
+        return ToResponse(service);
     }
 
-    public async Task Update(Service service)
+    public async Task Update(int id, ServiceRequest request)
     {
-        var current = await _context.Services.FindAsync(service.Id);
-        if (current == null)
-            throw new KeyNotFoundException();
+        Validator.ValidateObject(
+            request, new ValidationContext(request), true);
 
-        current.ServiceName = service.ServiceName;
-        current.BasePrice = service.BasePrice;
+        var service = await context.Services
+            .SingleOrDefaultAsync(s => s.Id == id)
+            ?? throw new KeyNotFoundException("Service not found.");
 
-        await _context.SaveChangesAsync();
+        service.ServiceName = request.ServiceName.Trim();
+        service.BasePrice = request.BasePrice;
+
+        if (!service.IsValid())
+            throw new ValidationException("Invalid service data.");
+
+        await context.SaveChangesAsync();
     }
 
     public async Task Delete(int id)
     {
-        var service = await _context.Services.FindAsync(id);
-        if (service == null)
-            throw new KeyNotFoundException();
+        var service = await context.Services
+            .SingleOrDefaultAsync(s => s.Id == id)
+            ?? throw new KeyNotFoundException("Service not found.");
 
-        _context.Services.Remove(service);
-        await _context.SaveChangesAsync();
+        if (await context.Appointments.AnyAsync(a => a.ServiceId == id))
+        {
+            throw new InvalidOperationException(
+                "Cannot delete a service used by appointments. " +
+                "Delete the appointments first.");
+        }
+
+        context.Services.Remove(service);
+        await context.SaveChangesAsync();
+    }
+
+    private static ServiceResponse ToResponse(Service service)
+    {
+        return new ServiceResponse(
+            service.Id,
+            service.ServiceName,
+            service.BasePrice);
     }
 }

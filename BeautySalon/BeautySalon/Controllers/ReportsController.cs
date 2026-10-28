@@ -1,4 +1,5 @@
-﻿using BeautySalonApi.Services;
+﻿using BeautySalonApi.Contracts;
+using BeautySalonApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,42 +8,35 @@ namespace BeautySalonApi.Controllers;
 [ApiController]
 [Route("api/reports")]
 [Authorize]
-public class ReportsController : ControllerBase
+public class ReportsController(ReportService service) : ControllerBase
 {
-    private readonly ReportService _reportService;
-
-    public ReportsController(ReportService reportService)
-    {
-        _reportService = reportService;
-    }
-
     [HttpGet("appointments-with-details")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> AppointmentsWithDetails()
+    public async Task<ActionResult<List<AppointmentsWithDetailsResponse>>>
+        AppointmentsWithDetails()
     {
-        var result = await _reportService.GetAppointmentsWithDetails();
-        return Ok(result);
+        return Ok(await service.GetAppointmentsWithDetails());
     }
 
     [HttpGet("employees-by-service")]
-    public async Task<IActionResult> EmployeesByService()
+    public async Task<ActionResult<List<EmployeesByServiceResponse>>>
+        EmployeesByService()
     {
-        var result = await _reportService.GetEmployeesByService();
-        return Ok(result);
+        return Ok(await service.GetEmployeesByService());
     }
 
     [HttpGet("clients-by-appointments")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> ClientsByAppointments()
+    public async Task<ActionResult<List<ClientsByAppointmentsResponse>>>
+        ClientsByAppointments()
     {
-        var result = await _reportService.GetClientsByAppointments();
-        return Ok(result);
+        return Ok(await service.GetClientsByAppointments());
     }
 
     [HttpGet("services-summary")]
-    public async Task<IActionResult> ServicesSummary()
+    public async Task<ActionResult<List<ServicesSummaryResponse>>>
+        ServicesSummary()
     {
-        var result = await _reportService.GetServicesSummary();
-        return Ok(result);
+        return Ok(await service.GetServicesSummary());
     }
 }

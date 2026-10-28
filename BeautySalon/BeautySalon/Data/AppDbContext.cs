@@ -5,7 +5,8 @@ namespace BeautySalonApi.Data;
 
 public class AppDbContext : DbContext
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    public AppDbContext(DbContextOptions<AppDbContext> options)
+        : base(options)
     {
     }
 
@@ -32,7 +33,7 @@ public class AppDbContext : DbContext
             entity.HasOne(e => e.User)
                 .WithMany()
                 .HasForeignKey(e => e.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Appointment>(entity =>
@@ -40,7 +41,7 @@ public class AppDbContext : DbContext
             entity.HasOne(a => a.Client)
                 .WithMany()
                 .HasForeignKey(a => a.ClientId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasOne(a => a.Employee)
                 .WithMany()

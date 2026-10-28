@@ -1,16 +1,16 @@
 ﻿namespace BeautySalonApi.Contracts;
 
-public record UserResponse(int Id, string Email, string FirstName, string LastName, string Role);
-
-public record AuthResponse(string Token, DateTimeOffset ExpiresAt, UserResponse User);
-
-public record EmployeeResponse(
+public record UserResponse(
     int Id,
+    string Email,
     string FirstName,
     string LastName,
-    string Phone,
-    int QualificationId,
-    string? QualificationName);
+    string Role);
+
+public record AuthResponse(
+    string Token,
+    DateTimeOffset ExpiresAt,
+    UserResponse User);
 
 public record ClientResponse(
     int Id,
@@ -18,12 +18,17 @@ public record ClientResponse(
     string LastName,
     string Phone);
 
+public record EmployeeResponse(
+    int Id,
+    int UserId,
+    string FirstName,
+    string LastName,
+    string Phone);
+
 public record ServiceResponse(
     int Id,
     string ServiceName,
-    decimal BasePrice,
-    int CategoryId,
-    string? CategoryName);
+    decimal BasePrice);
 
 public record AppointmentResponse(
     int Id,
@@ -36,18 +41,7 @@ public record AppointmentResponse(
     decimal Price,
     string ClientName,
     string EmployeeName,
-    string ServiceName,
-    string CategoryName);
-
-public record QualificationResponse(int Id, string QualificationName);
-
-public record ServiceCategoryResponse(int Id, string CategoryName);
-
-public record ReportResponse(
-    int TotalEmployees,
-    int TotalClients,
-    int TotalServices,
-    int TotalAppointments);
+    string ServiceName);
 
 public record AppointmentsWithDetailsResponse(
     int Id,
@@ -55,15 +49,13 @@ public record AppointmentsWithDetailsResponse(
     string Status,
     string Client,
     string Employee,
-    string Qualification,
     string Service,
-    string Category,
     decimal Price);
 
 public record EmployeesByServiceResponse(
     string Employee,
     string Service,
-    string Category);
+    int AppointmentsCount);
 
 public record ClientsByAppointmentsResponse(
     string Client,
@@ -73,4 +65,4 @@ public record ServicesSummaryResponse(
     int Id,
     string ServiceName,
     decimal BasePrice,
-    string Category);
+    int AppointmentsCount);

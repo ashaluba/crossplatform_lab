@@ -1,58 +1,96 @@
-﻿using BeautySalonApi.Data;
+﻿using System.ComponentModel.DataAnnotations;
+using BeautySalonApi.Contracts;
+using BeautySalonApi.Data;
 using BeautySalonApi.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace BeautySalonApi.Services;
 
-public class ClientService
+public class ClientService(AppDbContext context)
 {
-    private readonly AppDbContext _context;
-
-    public ClientService(AppDbContext context)
+    public async Task<List<ClientResponse>> GetAll()
     {
-        _context = context;
+        return await context.Clients
+            .AsNoTracking()
+            .OrderBy(c => c.Id)
+            .Select(c => new ClientResponse(
+                c.Id, c.FirstName, c.LastName, c.Phone))
+            .ToListAsync();
     }
 
-    public async Task<List<Client>> GetAll()
+    public async Task<ClientResponse> GetById(int id)
     {
-        return await _context.Clients.ToListAsync();
+        var client = await context.Clients
+            .AsNoTracking()
+            .SingleOrDefaultAsync(c => c.Id == id)
+            ?? throw new KeyNotFoundException("Client not found.");
+
+        return ToResponse(client);
     }
 
-    public async Task<Client?> GetById(int id)
+    public async Task<ClientResponse> Create(ClientRequest request)
     {
-        return await _context.Clients.FindAsync(id);
-    }
+        Validator.ValidateObject(
+            request, new ValidationContext(request), true);
 
-    public async Task<Client> Create(Client client)
-    {
+        var client = new Client
+        {
+            FirstName = request.FirstName.Trim(),
+            LastName = request.LastName.Trim(),
+            Phone = request.Phone.Trim()
+        };
+
         if (!client.IsValid())
-            throw new ArgumentException("Invalid client data.");
+            throw new ValidationException("Invalid client data.");
 
-        _context.Clients.Add(client);
-        await _context.SaveChangesAsync();
-        return client;
+        context.Clients.Add(client);
+        await context.SaveChangesAsync();
+
+        return ToResponse(client);
     }
 
-    public async Task Update(Client client)
+    public async Task Update(int id, ClientRequest request)
     {
-        var current = await _context.Clients.FindAsync(client.Id);
-        if (current == null)
-            throw new KeyNotFoundException();
+        Validator.ValidateObject(
+            request, new ValidationContext(request), true);
 
-        current.FirstName = client.FirstName;
-        current.LastName = client.LastName;
-        current.Phone = client.Phone;
+        var client = await context.Clients
+            .SingleOrDefaultAsync(c => c.Id == id)
+            ?? throw new KeyNotFoundException("Client not found.");
 
-        await _context.SaveChangesAsync();
+        client.FirstName = request.FirstName.Trim();
+        client.LastName = request.LastName.Trim();
+        client.Phone = request.Phone.Trim();
+
+        if (!client.IsValid())
+            throw new ValidationException("Invalid client data.");
+
+        await context.SaveChangesAsync();
     }
 
     public async Task Delete(int id)
     {
-        var client = await _context.Clients.FindAsync(id);
-        if (client == null)
-            throw new KeyNotFoundException();
+        var client = await context.Clients
+            .SingleOrDefaultAsync(c => c.Id == id)
+            ?? throw new KeyNotFoundException("Client not found.");
 
-        _context.Clients.Remove(client);
-        await _context.SaveChangesAsync();
+        if (await context.Appointments.AnyAsync(a => a.ClientId == id))
+        {
+            throw new InvalidOperationException(
+                "Cannot delete a client who has appointments. " +
+                "Delete the appointments first.");
+        }
+
+        context.Clients.Remove(client);
+        await context.SaveChangesAsync();
+    }
+
+    private static ClientResponse ToResponse(Client client)
+    {
+        return new ClientResponse(
+            client.Id,
+            client.FirstName,
+            client.LastName,
+            client.Phone);
     }
 }

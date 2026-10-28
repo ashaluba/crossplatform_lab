@@ -1,4 +1,5 @@
-﻿using BeautySalonApi.Contracts;
+﻿
+using BeautySalonApi.Contracts;
 using BeautySalonApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,8 +21,7 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var result = await _authService.Register(request);
-            return Ok(result);
+            return Ok(await _authService.Register(request));
         }
         catch (ArgumentException ex)
         {
@@ -38,8 +38,7 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var result = await _authService.Login(request);
-            return Ok(result);
+            return Ok(await _authService.Login(request));
         }
         catch (ArgumentException ex)
         {
