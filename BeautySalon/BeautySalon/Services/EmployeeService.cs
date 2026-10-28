@@ -16,14 +16,12 @@ public class EmployeeService
     public async Task<List<object>> GetAll()
     {
         return await _context.Employees
-            .Include(e => e.Qualification)
             .Select(e => new
             {
                 e.Id,
                 e.FirstName,
                 e.LastName,
-                e.Phone,
-                QualificationName = e.Qualification != null ? e.Qualification.QualificationName : null
+                e.Phone
             })
             .Cast<object>()
             .ToListAsync();
@@ -32,7 +30,6 @@ public class EmployeeService
     public async Task<Employee?> GetById(int id)
     {
         return await _context.Employees
-            .Include(e => e.Qualification)
             .FirstOrDefaultAsync(e => e.Id == id);
     }
 
@@ -55,7 +52,6 @@ public class EmployeeService
         current.FirstName = employee.FirstName;
         current.LastName = employee.LastName;
         current.Phone = employee.Phone;
-        current.QualificationId = employee.QualificationId;
 
         await _context.SaveChangesAsync();
     }

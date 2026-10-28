@@ -17,9 +17,7 @@ public class ReportService
         return await _context.Appointments
             .Include(a => a.Client)
             .Include(a => a.Employee)
-            .ThenInclude(e => e.Qualification)
             .Include(a => a.Service)
-            .ThenInclude(s => s.Category)
             .Select(a => new
             {
                 a.Id,
@@ -27,9 +25,7 @@ public class ReportService
                 a.Status,
                 Client = a.Client.FirstName + " " + a.Client.LastName,
                 Employee = a.Employee.FirstName + " " + a.Employee.LastName,
-                Qualification = a.Employee.Qualification.QualificationName,
                 Service = a.Service.ServiceName,
-                Category = a.Service.Category.CategoryName,
                 a.Price
             })
             .ToListAsync();
@@ -37,16 +33,23 @@ public class ReportService
 
     public async Task<object> GetEmployeesByService()
     {
-        return await _context.EmployeeServices
-            .Include(es => es.Employee)
-            .Include(es => es.Service)
-            .ThenInclude(s => s.Category)
-            .Select(es => new
+        return await _context.Appointments
+            .Include(a => a.Employee)
+            .Include(a => a.Service)
+            .GroupBy(a => new
             {
-                Employee = es.Employee.FirstName + " " + es.Employee.LastName,
-                Service = es.Service.ServiceName,
-                Category = es.Service.Category.CategoryName
+                EmployeeId = a.EmployeeId,
+                Employee = a.Employee.FirstName + " " + a.Employee.LastName,
+                ServiceId = a.ServiceId,
+                Service = a.Service.ServiceName
             })
+            .Select(g => new
+            {
+                Employee = g.Key.Employee,
+                Service = g.Key.Service,
+                AppointmentsCount = g.Count()
+            })
+            .OrderByDescending(x => x.AppointmentsCount)
             .ToListAsync();
     }
 
@@ -67,13 +70,12 @@ public class ReportService
     public async Task<object> GetServicesSummary()
     {
         return await _context.Services
-            .Include(s => s.Category)
             .Select(s => new
             {
                 s.Id,
                 s.ServiceName,
                 s.BasePrice,
-                Category = s.Category.CategoryName
+                AppointmentsCount = _context.Appointments.Count(a => a.ServiceId == s.Id)
             })
             .ToListAsync();
     }

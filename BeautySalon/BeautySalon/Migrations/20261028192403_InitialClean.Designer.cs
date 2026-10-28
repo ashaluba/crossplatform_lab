@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BeautySalon.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261028175128_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20261028192403_InitialClean")]
+    partial class InitialClean
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -100,55 +100,14 @@ namespace BeautySalon.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("QualificationId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("UserId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("QualificationId");
-
                     b.HasIndex("UserId");
 
                     b.ToTable("Employees");
-                });
-
-            modelBuilder.Entity("BeautySalonApi.Models.EmployeeServiceAssignment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("ServiceId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmployeeId");
-
-                    b.HasIndex("ServiceId");
-
-                    b.ToTable("EmployeeServices");
-                });
-
-            modelBuilder.Entity("BeautySalonApi.Models.Qualification", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("QualificationName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Qualifications");
                 });
 
             modelBuilder.Entity("BeautySalonApi.Models.Service", b =>
@@ -160,33 +119,13 @@ namespace BeautySalon.Migrations
                     b.Property<decimal>("BasePrice")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("ServiceName")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
-
                     b.ToTable("Services");
-                });
-
-            modelBuilder.Entity("BeautySalonApi.Models.ServiceCategory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("CategoryName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ServiceCategories");
                 });
 
             modelBuilder.Entity("BeautySalonApi.Models.User", b =>
@@ -255,51 +194,13 @@ namespace BeautySalon.Migrations
 
             modelBuilder.Entity("BeautySalonApi.Models.Employee", b =>
                 {
-                    b.HasOne("BeautySalonApi.Models.Qualification", "Qualification")
-                        .WithMany()
-                        .HasForeignKey("QualificationId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("BeautySalonApi.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Qualification");
-
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("BeautySalonApi.Models.EmployeeServiceAssignment", b =>
-                {
-                    b.HasOne("BeautySalonApi.Models.Employee", "Employee")
-                        .WithMany()
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BeautySalonApi.Models.Service", "Service")
-                        .WithMany()
-                        .HasForeignKey("ServiceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Employee");
-
-                    b.Navigation("Service");
-                });
-
-            modelBuilder.Entity("BeautySalonApi.Models.Service", b =>
-                {
-                    b.HasOne("BeautySalonApi.Models.ServiceCategory", "Category")
-                        .WithMany()
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Category");
                 });
 #pragma warning restore 612, 618
         }

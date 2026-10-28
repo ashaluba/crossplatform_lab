@@ -18,9 +18,7 @@ public class AppointmentService
         return await _context.Appointments
             .Include(a => a.Client)
             .Include(a => a.Employee)
-            .ThenInclude(e => e.Qualification)
             .Include(a => a.Service)
-            .ThenInclude(s => s.Category)
             .Select(a => new
             {
                 a.Id,
@@ -30,8 +28,7 @@ public class AppointmentService
                 a.Price,
                 Client = a.Client.FirstName + " " + a.Client.LastName,
                 Employee = a.Employee.FirstName + " " + a.Employee.LastName,
-                Service = a.Service.ServiceName,
-                Category = a.Service.Category.CategoryName
+                Service = a.Service.ServiceName
             })
             .Cast<object>()
             .ToListAsync();
@@ -42,9 +39,7 @@ public class AppointmentService
         return await _context.Appointments
             .Include(a => a.Client)
             .Include(a => a.Employee)
-            .ThenInclude(e => e.Qualification)
             .Include(a => a.Service)
-            .ThenInclude(s => s.Category)
             .FirstOrDefaultAsync(a => a.Id == id);
     }
 

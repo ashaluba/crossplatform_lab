@@ -17,6 +17,7 @@ public class ReportsController : ControllerBase
     }
 
     [HttpGet("appointments-with-details")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> AppointmentsWithDetails()
     {
         var result = await _reportService.GetAppointmentsWithDetails();

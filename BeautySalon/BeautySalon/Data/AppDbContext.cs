@@ -13,10 +13,7 @@ public class AppDbContext : DbContext
     public DbSet<Employee> Employees => Set<Employee>();
     public DbSet<Client> Clients => Set<Client>();
     public DbSet<Service> Services => Set<Service>();
-    public DbSet<EmployeeServiceAssignment> EmployeeServices => Set<EmployeeServiceAssignment>();
     public DbSet<Appointment> Appointments => Set<Appointment>();
-    public DbSet<Qualification> Qualifications => Set<Qualification>();
-    public DbSet<ServiceCategory> ServiceCategories => Set<ServiceCategory>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -35,32 +32,6 @@ public class AppDbContext : DbContext
             entity.HasOne(e => e.User)
                 .WithMany()
                 .HasForeignKey(e => e.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(e => e.Qualification)
-                .WithMany()
-                .HasForeignKey(e => e.QualificationId)
-                .OnDelete(DeleteBehavior.Restrict);
-        });
-
-        modelBuilder.Entity<Service>(entity =>
-        {
-            entity.HasOne(s => s.Category)
-                .WithMany()
-                .HasForeignKey(s => s.CategoryId)
-                .OnDelete(DeleteBehavior.Restrict);
-        });
-
-        modelBuilder.Entity<EmployeeServiceAssignment>(entity =>
-        {
-            entity.HasOne(es => es.Employee)
-                .WithMany()
-                .HasForeignKey(es => es.EmployeeId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(es => es.Service)
-                .WithMany()
-                .HasForeignKey(es => es.ServiceId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 

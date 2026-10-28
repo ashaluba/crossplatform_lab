@@ -236,16 +236,6 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "BeautySalonApi.Controllers.CommonController",
-    "Method": "GetReport",
-    "RelativePath": "api/Common/report",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [],
-    "ReturnTypes": []
-  },
-  {
     "ContainingType": "BeautySalonApi.Controllers.EmployeesController",
     "Method": "GetAll",
     "RelativePath": "api/employees",

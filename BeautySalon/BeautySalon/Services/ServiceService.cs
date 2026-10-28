@@ -16,13 +16,11 @@ public class ServiceService
     public async Task<List<object>> GetAll()
     {
         return await _context.Services
-            .Include(s => s.Category)
             .Select(s => new
             {
                 s.Id,
                 s.ServiceName,
-                s.BasePrice,
-                CategoryName = s.Category != null ? s.Category.CategoryName : null
+                s.BasePrice
             })
             .Cast<object>()
             .ToListAsync();
@@ -31,7 +29,6 @@ public class ServiceService
     public async Task<Service?> GetById(int id)
     {
         return await _context.Services
-            .Include(s => s.Category)
             .FirstOrDefaultAsync(s => s.Id == id);
     }
 
@@ -53,7 +50,6 @@ public class ServiceService
 
         current.ServiceName = service.ServiceName;
         current.BasePrice = service.BasePrice;
-        current.CategoryId = service.CategoryId;
 
         await _context.SaveChangesAsync();
     }

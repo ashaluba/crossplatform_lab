@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BeautySalon.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialClean : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -27,29 +27,17 @@ namespace BeautySalon.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Qualifications",
+                name: "Services",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    QualificationName = table.Column<string>(type: "TEXT", nullable: false)
+                    ServiceName = table.Column<string>(type: "TEXT", nullable: false),
+                    BasePrice = table.Column<decimal>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Qualifications", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ServiceCategories",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    CategoryName = table.Column<string>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ServiceCategories", x => x.Id);
+                    table.PrimaryKey("PK_Services", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -71,27 +59,6 @@ namespace BeautySalon.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Services",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    ServiceName = table.Column<string>(type: "TEXT", nullable: false),
-                    CategoryId = table.Column<int>(type: "INTEGER", nullable: false),
-                    BasePrice = table.Column<decimal>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Services", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Services_ServiceCategories_CategoryId",
-                        column: x => x.CategoryId,
-                        principalTable: "ServiceCategories",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Employees",
                 columns: table => new
                 {
@@ -100,18 +67,11 @@ namespace BeautySalon.Migrations
                     UserId = table.Column<int>(type: "INTEGER", nullable: false),
                     FirstName = table.Column<string>(type: "TEXT", nullable: false),
                     LastName = table.Column<string>(type: "TEXT", nullable: false),
-                    Phone = table.Column<string>(type: "TEXT", nullable: false),
-                    QualificationId = table.Column<int>(type: "INTEGER", nullable: false)
+                    Phone = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Employees", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Employees_Qualifications_QualificationId",
-                        column: x => x.QualificationId,
-                        principalTable: "Qualifications",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Employees_Users_UserId",
                         column: x => x.UserId,
@@ -157,32 +117,6 @@ namespace BeautySalon.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "EmployeeServices",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    EmployeeId = table.Column<int>(type: "INTEGER", nullable: false),
-                    ServiceId = table.Column<int>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_EmployeeServices", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_EmployeeServices_Employees_EmployeeId",
-                        column: x => x.EmployeeId,
-                        principalTable: "Employees",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_EmployeeServices_Services_ServiceId",
-                        column: x => x.ServiceId,
-                        principalTable: "Services",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_Appointments_ClientId",
                 table: "Appointments",
@@ -199,29 +133,9 @@ namespace BeautySalon.Migrations
                 column: "ServiceId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Employees_QualificationId",
-                table: "Employees",
-                column: "QualificationId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Employees_UserId",
                 table: "Employees",
                 column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_EmployeeServices_EmployeeId",
-                table: "EmployeeServices",
-                column: "EmployeeId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_EmployeeServices_ServiceId",
-                table: "EmployeeServices",
-                column: "ServiceId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Services_CategoryId",
-                table: "Services",
-                column: "CategoryId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_Email",
@@ -237,9 +151,6 @@ namespace BeautySalon.Migrations
                 name: "Appointments");
 
             migrationBuilder.DropTable(
-                name: "EmployeeServices");
-
-            migrationBuilder.DropTable(
                 name: "Clients");
 
             migrationBuilder.DropTable(
@@ -249,13 +160,7 @@ namespace BeautySalon.Migrations
                 name: "Services");
 
             migrationBuilder.DropTable(
-                name: "Qualifications");
-
-            migrationBuilder.DropTable(
                 name: "Users");
-
-            migrationBuilder.DropTable(
-                name: "ServiceCategories");
         }
     }
 }

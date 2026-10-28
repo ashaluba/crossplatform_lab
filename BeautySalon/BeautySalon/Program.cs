@@ -53,26 +53,8 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-   
+
     db.Database.Migrate();
-
-    if (!db.Qualifications.Any())
-    {
-        db.Qualifications.AddRange(
-            new BeautySalonApi.Models.Qualification { QualificationName = "Hairdresser" },
-            new BeautySalonApi.Models.Qualification { QualificationName = "Manicurist" },
-            new BeautySalonApi.Models.Qualification { QualificationName = "Massage Specialist" }
-        );
-    }
-
-    if (!db.ServiceCategories.Any())
-    {
-        db.ServiceCategories.AddRange(
-            new BeautySalonApi.Models.ServiceCategory { CategoryName = "Hair" },
-            new BeautySalonApi.Models.ServiceCategory { CategoryName = "Nails" },
-            new BeautySalonApi.Models.ServiceCategory { CategoryName = "Massage" }
-        );
-    }
 
     if (!db.Users.Any())
     {

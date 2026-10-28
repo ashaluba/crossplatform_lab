@@ -13,7 +13,7 @@ public class RegisterRequest
     [Required, EmailAddress]
     public string Email { get; init; } = string.Empty;
 
-    [Required, MinLength(8)]
+    [Required]
     public string Password { get; init; } = string.Empty;
 
     public string Role { get; init; } = "Client";
@@ -38,9 +38,6 @@ public class EmployeeRequest
 
     [Required]
     public string Phone { get; init; } = string.Empty;
-
-    [Range(1, int.MaxValue)]
-    public int QualificationId { get; init; }
 }
 
 public class ClientRequest
@@ -59,9 +56,6 @@ public class ServiceRequest
 {
     [Required]
     public string ServiceName { get; init; } = string.Empty;
-
-    [Range(1, int.MaxValue)]
-    public int CategoryId { get; init; }
 
     [Range(typeof(decimal), "0", "99999999.99", ParseLimitsInInvariantCulture = true, ConvertValueInInvariantCulture = true)]
     public decimal BasePrice { get; init; }
