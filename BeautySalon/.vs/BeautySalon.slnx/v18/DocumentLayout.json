@@ -1,0 +1,144 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\lubam\\Documents\\GitHub\\crossplatform_lab\\BeautySalon\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{B6B841C7-10F9-4683-85A4-1218FA108085}|BeautySalon\\BeautySalon.csproj|c:\\users\\lubam\\documents\\github\\crossplatform_lab\\beautysalon\\beautysalon\\controllers\\clientscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B6B841C7-10F9-4683-85A4-1218FA108085}|BeautySalon\\BeautySalon.csproj|solutionrelative:beautysalon\\controllers\\clientscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B6B841C7-10F9-4683-85A4-1218FA108085}|BeautySalon\\BeautySalon.csproj|c:\\users\\lubam\\documents\\github\\crossplatform_lab\\beautysalon\\beautysalon\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B6B841C7-10F9-4683-85A4-1218FA108085}|BeautySalon\\BeautySalon.csproj|solutionrelative:beautysalon\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B6B841C7-10F9-4683-85A4-1218FA108085}|BeautySalon\\BeautySalon.csproj|c:\\users\\lubam\\documents\\github\\crossplatform_lab\\beautysalon\\beautysalon\\controllers\\appointmentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B6B841C7-10F9-4683-85A4-1218FA108085}|BeautySalon\\BeautySalon.csproj|solutionrelative:beautysalon\\controllers\\appointmentscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B6B841C7-10F9-4683-85A4-1218FA108085}|BeautySalon\\BeautySalon.csproj|c:\\users\\lubam\\documents\\github\\crossplatform_lab\\beautysalon\\beautysalon\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B6B841C7-10F9-4683-85A4-1218FA108085}|BeautySalon\\BeautySalon.csproj|solutionrelative:beautysalon\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B6B841C7-10F9-4683-85A4-1218FA108085}|BeautySalon\\BeautySalon.csproj|c:\\users\\lubam\\documents\\github\\crossplatform_lab\\beautysalon\\beautysalon\\services\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B6B841C7-10F9-4683-85A4-1218FA108085}|BeautySalon\\BeautySalon.csproj|solutionrelative:beautysalon\\services\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B6B841C7-10F9-4683-85A4-1218FA108085}|BeautySalon\\BeautySalon.csproj|c:\\users\\lubam\\documents\\github\\crossplatform_lab\\beautysalon\\beautysalon\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B6B841C7-10F9-4683-85A4-1218FA108085}|BeautySalon\\BeautySalon.csproj|solutionrelative:beautysalon\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 1,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedHeight": 217,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ClientsController.cs",
+              "DocumentMoniker": "C:\\Users\\lubam\\Documents\\GitHub\\crossplatform_lab\\BeautySalon\\BeautySalon\\Controllers\\ClientsController.cs",
+              "RelativeDocumentMoniker": "BeautySalon\\Controllers\\ClientsController.cs",
+              "ToolTip": "C:\\Users\\lubam\\Documents\\GitHub\\crossplatform_lab\\BeautySalon\\BeautySalon\\Controllers\\ClientsController.cs",
+              "RelativeToolTip": "BeautySalon\\Controllers\\ClientsController.cs",
+              "ViewState": "AgIAADMAAAAAAAAAAAAowDgAAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-28T18:02:27.778Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "C:\\Users\\lubam\\Documents\\GitHub\\crossplatform_lab\\BeautySalon\\BeautySalon\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "BeautySalon\\Controllers\\AuthController.cs",
+              "ToolTip": "C:\\Users\\lubam\\Documents\\GitHub\\crossplatform_lab\\BeautySalon\\BeautySalon\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "BeautySalon\\Controllers\\AuthController.cs",
+              "ViewState": "AgIAABcAAAAAAAAAAAAgwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-28T18:02:25.143Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "AppointmentsController.cs",
+              "DocumentMoniker": "C:\\Users\\lubam\\Documents\\GitHub\\crossplatform_lab\\BeautySalon\\BeautySalon\\Controllers\\AppointmentsController.cs",
+              "RelativeDocumentMoniker": "BeautySalon\\Controllers\\AppointmentsController.cs",
+              "ToolTip": "C:\\Users\\lubam\\Documents\\GitHub\\crossplatform_lab\\BeautySalon\\BeautySalon\\Controllers\\AppointmentsController.cs",
+              "RelativeToolTip": "BeautySalon\\Controllers\\AppointmentsController.cs",
+              "ViewState": "AgIAAC0AAAAAAAAAAAAowAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-28T18:02:22.234Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "AdminController.cs",
+              "DocumentMoniker": "C:\\Users\\lubam\\Documents\\GitHub\\crossplatform_lab\\BeautySalon\\BeautySalon\\Controllers\\AdminController.cs",
+              "RelativeDocumentMoniker": "BeautySalon\\Controllers\\AdminController.cs",
+              "ToolTip": "C:\\Users\\lubam\\Documents\\GitHub\\crossplatform_lab\\BeautySalon\\BeautySalon\\Controllers\\AdminController.cs",
+              "RelativeToolTip": "BeautySalon\\Controllers\\AdminController.cs",
+              "ViewState": "AgIAAD0AAAAAAAAAAAAuwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-28T18:02:15.274Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "AuthService.cs",
+              "DocumentMoniker": "C:\\Users\\lubam\\Documents\\GitHub\\crossplatform_lab\\BeautySalon\\BeautySalon\\Services\\AuthService.cs",
+              "RelativeDocumentMoniker": "BeautySalon\\Services\\AuthService.cs",
+              "ToolTip": "C:\\Users\\lubam\\Documents\\GitHub\\crossplatform_lab\\BeautySalon\\BeautySalon\\Services\\AuthService.cs",
+              "RelativeToolTip": "BeautySalon\\Services\\AuthService.cs",
+              "ViewState": "AgIAAA0AAAAAAAAAAAAzwA0AAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-28T16:25:41.581Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\lubam\\Documents\\GitHub\\crossplatform_lab\\BeautySalon\\BeautySalon\\Program.cs",
+              "RelativeDocumentMoniker": "BeautySalon\\Program.cs",
+              "ToolTip": "C:\\Users\\lubam\\Documents\\GitHub\\crossplatform_lab\\BeautySalon\\BeautySalon\\Program.cs",
+              "RelativeToolTip": "BeautySalon\\Program.cs",
+              "ViewState": "AgIAACIAAAAAAAAAAAAnwDcAAAADAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-28T16:23:03.82Z",
+              "EditorCaption": ""
+            }
+          ]
+        },
+        {
+          "DockedHeight": 141,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

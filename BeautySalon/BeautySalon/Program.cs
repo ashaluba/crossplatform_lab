@@ -1,0 +1,104 @@
+using BeautySalonApi.Data;
+using BeautySalonApi.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidateAudience = true,
+        ValidAudience = jwtSettings["Audience"],
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero
+    };
+});
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<EmployeeService>();
+builder.Services.AddScoped<ClientService>();
+builder.Services.AddScoped<ServiceService>();
+builder.Services.AddScoped<AppointmentService>();
+builder.Services.AddScoped<ReportService>();
+
+var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+   
+    db.Database.Migrate();
+
+    if (!db.Qualifications.Any())
+    {
+        db.Qualifications.AddRange(
+            new BeautySalonApi.Models.Qualification { QualificationName = "Hairdresser" },
+            new BeautySalonApi.Models.Qualification { QualificationName = "Manicurist" },
+            new BeautySalonApi.Models.Qualification { QualificationName = "Massage Specialist" }
+        );
+    }
+
+    if (!db.ServiceCategories.Any())
+    {
+        db.ServiceCategories.AddRange(
+            new BeautySalonApi.Models.ServiceCategory { CategoryName = "Hair" },
+            new BeautySalonApi.Models.ServiceCategory { CategoryName = "Nails" },
+            new BeautySalonApi.Models.ServiceCategory { CategoryName = "Massage" }
+        );
+    }
+
+    if (!db.Users.Any())
+    {
+        db.Users.Add(new BeautySalonApi.Models.User
+        {
+            FirstName = "Admin",
+            LastName = "Salon",
+            Email = "admin@beautysalon.com",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("123456"),
+            Role = "Admin"
+        });
+    }
+
+    db.SaveChanges();
+}
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();

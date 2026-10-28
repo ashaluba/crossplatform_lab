@@ -1,0 +1,85 @@
+﻿using BeautySalonApi.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace BeautySalonApi.Data;
+
+public class AppDbContext : DbContext
+{
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    {
+    }
+
+    public DbSet<User> Users => Set<User>();
+    public DbSet<Employee> Employees => Set<Employee>();
+    public DbSet<Client> Clients => Set<Client>();
+    public DbSet<Service> Services => Set<Service>();
+    public DbSet<EmployeeServiceAssignment> EmployeeServices => Set<EmployeeServiceAssignment>();
+    public DbSet<Appointment> Appointments => Set<Appointment>();
+    public DbSet<Qualification> Qualifications => Set<Qualification>();
+    public DbSet<ServiceCategory> ServiceCategories => Set<ServiceCategory>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasIndex(u => u.Email).IsUnique();
+            entity.Property(u => u.Email).IsRequired();
+            entity.Property(u => u.PasswordHash).IsRequired();
+            entity.Property(u => u.Role).IsRequired();
+        });
+
+        modelBuilder.Entity<Employee>(entity =>
+        {
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Qualification)
+                .WithMany()
+                .HasForeignKey(e => e.QualificationId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<Service>(entity =>
+        {
+            entity.HasOne(s => s.Category)
+                .WithMany()
+                .HasForeignKey(s => s.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<EmployeeServiceAssignment>(entity =>
+        {
+            entity.HasOne(es => es.Employee)
+                .WithMany()
+                .HasForeignKey(es => es.EmployeeId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(es => es.Service)
+                .WithMany()
+                .HasForeignKey(es => es.ServiceId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Appointment>(entity =>
+        {
+            entity.HasOne(a => a.Client)
+                .WithMany()
+                .HasForeignKey(a => a.ClientId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(a => a.Employee)
+                .WithMany()
+                .HasForeignKey(a => a.EmployeeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(a => a.Service)
+                .WithMany()
+                .HasForeignKey(a => a.ServiceId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+    }
+}
