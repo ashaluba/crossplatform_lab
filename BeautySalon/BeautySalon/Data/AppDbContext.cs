@@ -23,16 +23,29 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasIndex(u => u.Email).IsUnique();
+
             entity.Property(u => u.Email).IsRequired();
             entity.Property(u => u.PasswordHash).IsRequired();
             entity.Property(u => u.Role).IsRequired();
         });
 
+        modelBuilder.Entity<Client>(entity =>
+        {
+            entity.HasIndex(c => c.UserId).IsUnique();
+
+            entity.HasOne(c => c.User)
+                .WithOne()
+                .HasForeignKey<Client>(c => c.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
         modelBuilder.Entity<Employee>(entity =>
         {
+            entity.HasIndex(e => e.UserId).IsUnique();
+
             entity.HasOne(e => e.User)
-                .WithMany()
-                .HasForeignKey(e => e.UserId)
+                .WithOne()
+                .HasForeignKey<Employee>(e => e.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 

@@ -14,7 +14,9 @@ public class AuthService
     private readonly AppDbContext _context;
     private readonly IConfiguration _configuration;
 
-    public AuthService(AppDbContext context, IConfiguration configuration)
+    public AuthService(
+        AppDbContext context,
+        IConfiguration configuration)
     {
         _context = context;
         _configuration = configuration;
@@ -22,39 +24,83 @@ public class AuthService
 
     public async Task<object> Register(RegisterRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.Email) ||
-            string.IsNullOrWhiteSpace(request.Password))
+        if (string.IsNullOrWhiteSpace(request.FirstName) ||
+            string.IsNullOrWhiteSpace(request.LastName) ||
+            string.IsNullOrWhiteSpace(request.Email) ||
+            string.IsNullOrWhiteSpace(request.Password) ||
+            string.IsNullOrWhiteSpace(request.Phone))
         {
-            throw new ArgumentException("Email and password required.");
+            throw new ArgumentException(
+                "All registration fields are required.");
         }
 
-        var allowedRoles = new[] { "Client", "Employee", "Admin" };
+        var role = request.Role.Trim();
 
-        var role = allowedRoles.FirstOrDefault(r =>
-            r.Equals(request.Role?.Trim(), StringComparison.OrdinalIgnoreCase));
-
-        if (role == null)
+        if (role.Equals("Client", StringComparison.OrdinalIgnoreCase))
+            role = "Client";
+        else if (role.Equals("Employee", StringComparison.OrdinalIgnoreCase))
+            role = "Employee";
+        else
             throw new ArgumentException(
-                "Invalid role. Allowed roles: Client, Employee, Admin.");
+                "Role must be Client or Employee.");
 
         var email = request.Email.Trim();
 
-        var exists = await _context.Users.AnyAsync(u => u.Email == email);
-
-        if (exists)
+        if (await _context.Users.AnyAsync(u => u.Email == email))
             throw new InvalidOperationException("User already exists.");
+
+        var firstName = request.FirstName.Trim();
+        var lastName = request.LastName.Trim();
+        var phone = request.Phone.Trim();
 
         var user = new User
         {
-            FirstName = request.FirstName.Trim(),
-            LastName = request.LastName.Trim(),
+            FirstName = firstName,
+            LastName = lastName,
             Email = email,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(
+                request.Password),
             Role = role
         };
 
         _context.Users.Add(user);
-        await _context.SaveChangesAsync();
+
+        int profileId;
+
+        if (role == "Client")
+        {
+            var client = new Client
+            {
+                User = user,
+                FirstName = firstName,
+                LastName = lastName,
+                Phone = phone
+            };
+
+            _context.Clients.Add(client);
+
+            // SaveChanges will insert both records.
+            await _context.SaveChangesAsync();
+
+            profileId = client.Id;
+        }
+        else
+        {
+            var employee = new Employee
+            {
+                User = user,
+                FirstName = firstName,
+                LastName = lastName,
+                Phone = phone
+            };
+
+            _context.Employees.Add(employee);
+
+            // SaveChanges will insert both records.
+            await _context.SaveChangesAsync();
+
+            profileId = employee.Id;
+        }
 
         return new
         {
@@ -66,7 +112,8 @@ public class AuthService
                 user.FirstName,
                 user.LastName,
                 user.Role
-            }
+            },
+            profileId
         };
     }
 
@@ -75,7 +122,8 @@ public class AuthService
         if (string.IsNullOrWhiteSpace(request.Email) ||
             string.IsNullOrWhiteSpace(request.Password))
         {
-            throw new ArgumentException("Email and password required.");
+            throw new ArgumentException(
+                "Email and password required.");
         }
 
         var user = await _context.Users.FirstOrDefaultAsync(
@@ -85,7 +133,8 @@ public class AuthService
             throw new UnauthorizedAccessException();
 
         var valid = BCrypt.Net.BCrypt.Verify(
-            request.Password, user.PasswordHash);
+            request.Password,
+            user.PasswordHash);
 
         if (!valid)
             throw new UnauthorizedAccessException();
@@ -112,7 +161,9 @@ public class AuthService
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(
+                ClaimTypes.NameIdentifier,
+                user.Id.ToString()),
             new Claim(
                 ClaimTypes.Name,
                 $"{user.FirstName} {user.LastName}"),

@@ -74,7 +74,13 @@ namespace BeautySalon.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("UserId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Clients");
                 });
@@ -102,7 +108,8 @@ namespace BeautySalon.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Employees");
                 });
@@ -189,11 +196,21 @@ namespace BeautySalon.Migrations
                     b.Navigation("Service");
                 });
 
+            modelBuilder.Entity("BeautySalonApi.Models.Client", b =>
+                {
+                    b.HasOne("BeautySalonApi.Models.User", "User")
+                        .WithOne()
+                        .HasForeignKey("BeautySalonApi.Models.Client", "UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("BeautySalonApi.Models.Employee", b =>
                 {
                     b.HasOne("BeautySalonApi.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
+                        .WithOne()
+                        .HasForeignKey("BeautySalonApi.Models.Employee", "UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 

@@ -33,8 +33,15 @@ public class EmployeeService(AppDbContext context)
         Validator.ValidateObject(
             request, new ValidationContext(request), true);
 
-        if (!await context.Users.AnyAsync(u => u.Id == request.UserId))
+        var user = await context.Users
+    .SingleOrDefaultAsync(u => u.Id == request.UserId);
+
+        if (user == null)
             throw new ValidationException("The specified user does not exist.");
+
+        if (user.Role != "Employee")
+            throw new ValidationException(
+                "The user must have the Employee role.");
 
         if (await context.Employees.AnyAsync(e => e.UserId == request.UserId))
         {
