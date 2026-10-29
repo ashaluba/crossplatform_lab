@@ -1,5 +1,21 @@
 [
   {
+    "ContainingType": "BeautySalonApi.Controllers.AdminsController",
+    "Method": "Create",
+    "RelativePath": "api/admins",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "request",
+        "Type": "BeautySalonApi.Contracts.AdminCreateRequest",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "BeautySalonApi.Controllers.AppointmentsController",
     "Method": "GetAll",
     "RelativePath": "api/appointments",
@@ -279,7 +295,7 @@
     "Parameters": [
       {
         "Name": "request",
-        "Type": "BeautySalonApi.Contracts.EmployeeRequest",
+        "Type": "BeautySalonApi.Contracts.EmployeeCreateRequest",
         "IsRequired": true
       }
     ],

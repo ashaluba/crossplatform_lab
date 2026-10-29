@@ -12,12 +12,14 @@ namespace BeautySalonApi.Controllers;
 public class ClientsController(ClientService service) : ControllerBase
 {
     [HttpGet]
+    [Authorize(Roles = "Admin,Employee")]
     public async Task<ActionResult<List<ClientResponse>>> GetAll()
     {
         return Ok(await service.GetAll());
     }
 
     [HttpGet("{id:int}")]
+    [Authorize(Roles = "Admin,Employee")]
     public async Task<ActionResult<ClientResponse>> GetById(int id)
     {
         try

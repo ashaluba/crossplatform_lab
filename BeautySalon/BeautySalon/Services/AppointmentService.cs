@@ -17,38 +17,82 @@ public class AppointmentService(AppDbContext context)
             .Include(a => a.Service);
     }
 
-    public async Task<List<AppointmentResponse>> GetAll()
+    public async Task<List<AppointmentResponse>> GetAll(
+    int userId, bool isAdmin, bool isEmployee)
     {
-        return await QueryWithDetails()
+        var query = QueryWithDetails();
+
+        if (!isAdmin && isEmployee)
+        {
+            var employeeId = await context.Employees
+                .Where(e => e.UserId == userId)
+                .Select(e => (int?)e.Id)
+                .SingleOrDefaultAsync();
+
+            if (employeeId == null)
+                return new List<AppointmentResponse>();
+
+            query = query.Where(a => a.EmployeeId == employeeId.Value);
+        }
+        else if (!isAdmin)
+        {
+            var clientId = await context.Clients
+                .Where(c => c.UserId == userId)
+                .Select(c => (int?)c.Id)
+                .SingleOrDefaultAsync();
+
+            if (clientId == null)
+                return new List<AppointmentResponse>();
+
+            query = query.Where(a => a.ClientId == clientId.Value);
+        }
+
+        return await query
             .OrderBy(a => a.DateTime)
             .Select(a => new AppointmentResponse(
-                a.Id,
-                a.ClientId,
-                a.EmployeeId,
-                a.ServiceId,
-                a.DateTime,
-                a.Duration,
-                a.Status,
-                a.Price,
+                a.Id, a.ClientId, a.EmployeeId, a.ServiceId,
+                a.DateTime, a.Duration, a.Status, a.Price,
                 a.Client!.FirstName + " " + a.Client.LastName,
                 a.Employee!.FirstName + " " + a.Employee.LastName,
                 a.Service!.ServiceName))
             .ToListAsync();
     }
 
-    public async Task<AppointmentResponse> GetById(int id)
+    public async Task<AppointmentResponse> GetById(
+    int id, int userId, bool isAdmin, bool isEmployee)
     {
-        var appointment = await QueryWithDetails()
-            .Where(a => a.Id == id)
+        var query = QueryWithDetails()
+            .Where(a => a.Id == id);
+
+        if (!isAdmin && isEmployee)
+        {
+            var employeeId = await context.Employees
+                .Where(e => e.UserId == userId)
+                .Select(e => (int?)e.Id)
+                .SingleOrDefaultAsync();
+
+            if (employeeId == null)
+                throw new KeyNotFoundException("Appointment not found.");
+
+            query = query.Where(a => a.EmployeeId == employeeId.Value);
+        }
+        else if (!isAdmin)
+        {
+            var clientId = await context.Clients
+                .Where(c => c.UserId == userId)
+                .Select(c => (int?)c.Id)
+                .SingleOrDefaultAsync();
+
+            if (clientId == null)
+                throw new KeyNotFoundException("Appointment not found.");
+
+            query = query.Where(a => a.ClientId == clientId.Value);
+        }
+
+        var appointment = await query
             .Select(a => new AppointmentResponse(
-                a.Id,
-                a.ClientId,
-                a.EmployeeId,
-                a.ServiceId,
-                a.DateTime,
-                a.Duration,
-                a.Status,
-                a.Price,
+                a.Id, a.ClientId, a.EmployeeId, a.ServiceId,
+                a.DateTime, a.Duration, a.Status, a.Price,
                 a.Client!.FirstName + " " + a.Client.LastName,
                 a.Employee!.FirstName + " " + a.Employee.LastName,
                 a.Service!.ServiceName))
@@ -62,6 +106,7 @@ public class AppointmentService(AppDbContext context)
     {
         Validate(request);
         await EnsureReferencesExist(request);
+        await EnsureNoOverlap(request);
 
         var appointment = new Appointment
         {
@@ -84,13 +129,14 @@ public class AppointmentService(AppDbContext context)
         context.Appointments.Add(appointment);
         await context.SaveChangesAsync();
 
-        return await GetById(appointment.Id);
+        return await GetById(appointment.Id, 0, true, false);
     }
 
     public async Task Update(int id, AppointmentRequest request)
     {
         Validate(request);
         await EnsureReferencesExist(request);
+        await EnsureNoOverlap(request, id);
 
         var appointment = await context.Appointments
             .SingleOrDefaultAsync(a => a.Id == id)
@@ -140,5 +186,36 @@ public class AppointmentService(AppDbContext context)
 
         if (!await context.Services.AnyAsync(s => s.Id == request.ServiceId))
             throw new ValidationException("The specified service does not exist.");
+    }
+    private async Task EnsureNoOverlap(
+    AppointmentRequest request,
+    int? excludeAppointmentId = null)
+    {
+        var appointments = await context.Appointments
+            .AsNoTracking()
+            .Where(a => a.EmployeeId == request.EmployeeId)
+            .Where(a => excludeAppointmentId == null ||
+                        a.Id != excludeAppointmentId.Value)
+            .Select(a => new
+            {
+                a.DateTime,
+                a.Duration
+            })
+            .ToListAsync();
+
+        var newStart = request.DateTime;
+        var newEnd = newStart.AddMinutes(request.Duration);
+
+        foreach (var appointment in appointments)
+        {
+            var existingStart = appointment.DateTime;
+            var existingEnd = existingStart.AddMinutes(appointment.Duration);
+
+            if (newStart < existingEnd && newEnd > existingStart)
+            {
+                throw new ValidationException(
+                    "The employee already has an appointment at this time.");
+            }
+        }
     }
 }

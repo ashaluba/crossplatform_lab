@@ -3,6 +3,7 @@ using BeautySalonApi.Contracts;
 using BeautySalonApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BeautySalonApi.Controllers;
 
@@ -15,15 +16,32 @@ public class AppointmentsController(AppointmentService service)
     [HttpGet]
     public async Task<ActionResult<List<AppointmentResponse>>> GetAll()
     {
-        return Ok(await service.GetAll());
+        var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!int.TryParse(userIdValue, out var userId))
+            return Unauthorized();
+
+        var isAdmin = User.IsInRole("Admin");
+        var isEmployee = User.IsInRole("Employee");
+
+        return Ok(await service.GetAll(userId, isAdmin, isEmployee));
     }
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<AppointmentResponse>> GetById(int id)
     {
+        var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!int.TryParse(userIdValue, out var userId))
+            return Unauthorized();
+
+        var isAdmin = User.IsInRole("Admin");
+        var isEmployee = User.IsInRole("Employee");
+
         try
         {
-            return Ok(await service.GetById(id));
+            return Ok(await service.GetById(
+                id, userId, isAdmin, isEmployee));
         }
         catch (KeyNotFoundException ex)
         {

@@ -12,15 +12,18 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
 
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultAuthenticateScheme =
+        JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme =
+        JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(options =>
 {
@@ -52,23 +55,28 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    var db = scope.ServiceProvider
+        .GetRequiredService<AppDbContext>();
 
     db.Database.Migrate();
 
-    if (!db.Users.Any())
+    const string adminEmail = "admin@beautysalon.ru";
+    const string adminPassword = "Admin123!";
+
+    if (!db.Users.Any(u => u.Email == adminEmail))
     {
         db.Users.Add(new BeautySalonApi.Models.User
         {
             FirstName = "Admin",
             LastName = "Salon",
-            Email = "admin@beautysalon.com",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("123456"),
+            Email = adminEmail,
+            PasswordHash =
+                BCrypt.Net.BCrypt.HashPassword(adminPassword),
             Role = "Admin"
         });
-    }
 
-    db.SaveChanges();
+        db.SaveChanges();
+    }
 }
 
 if (app.Environment.IsDevelopment())

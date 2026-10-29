@@ -8,7 +8,7 @@ namespace BeautySalonApi.Controllers;
 
 [ApiController]
 [Route("api/employees")]
-[Authorize]
+[Authorize(Roles = "Admin")]
 public class EmployeesController(EmployeeService service) : ControllerBase
 {
     [HttpGet]
@@ -31,9 +31,8 @@ public class EmployeesController(EmployeeService service) : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<EmployeeResponse>> Create(
-        EmployeeRequest request)
+        EmployeeCreateRequest request)
     {
         try
         {
@@ -55,7 +54,6 @@ public class EmployeesController(EmployeeService service) : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(
         int id,
         EmployeeRequest request)
@@ -80,7 +78,6 @@ public class EmployeesController(EmployeeService service) : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
-    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)
     {
         try

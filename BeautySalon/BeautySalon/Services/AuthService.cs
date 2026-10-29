@@ -1,4 +1,5 @@
-﻿using BeautySalonApi.Contracts;
+﻿
+using BeautySalonApi.Contracts;
 using BeautySalonApi.Data;
 using BeautySalonApi.Models;
 using Microsoft.EntityFrameworkCore;
@@ -36,14 +37,14 @@ public class AuthService
 
         var role = request.Role.Trim();
 
-        if (role.Equals("Client", StringComparison.OrdinalIgnoreCase))
-            role = "Client";
-        else if (role.Equals("Employee", StringComparison.OrdinalIgnoreCase))
-            role = "Employee";
-        else
+        if (!role.Equals("Client",
+                StringComparison.OrdinalIgnoreCase))
+        {
             throw new ArgumentException(
-                "Role must be Client or Employee.");
+                "Public registration is available only for clients.");
+        }
 
+        role = "Client";
         var email = request.Email.Trim();
 
         if (await _context.Users.AnyAsync(u => u.Email == email))
@@ -58,49 +59,23 @@ public class AuthService
             FirstName = firstName,
             LastName = lastName,
             Email = email,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(
-                request.Password),
+            PasswordHash =
+                BCrypt.Net.BCrypt.HashPassword(request.Password),
             Role = role
         };
 
         _context.Users.Add(user);
 
-        int profileId;
-
-        if (role == "Client")
+        var client = new Client
         {
-            var client = new Client
-            {
-                User = user,
-                FirstName = firstName,
-                LastName = lastName,
-                Phone = phone
-            };
+            User = user,
+            FirstName = firstName,
+            LastName = lastName,
+            Phone = phone
+        };
 
-            _context.Clients.Add(client);
-
-            // SaveChanges will insert both records.
-            await _context.SaveChangesAsync();
-
-            profileId = client.Id;
-        }
-        else
-        {
-            var employee = new Employee
-            {
-                User = user,
-                FirstName = firstName,
-                LastName = lastName,
-                Phone = phone
-            };
-
-            _context.Employees.Add(employee);
-
-            // SaveChanges will insert both records.
-            await _context.SaveChangesAsync();
-
-            profileId = employee.Id;
-        }
+        _context.Clients.Add(client);
+        await _context.SaveChangesAsync();
 
         return new
         {
@@ -113,7 +88,46 @@ public class AuthService
                 user.LastName,
                 user.Role
             },
-            profileId
+            profileId = client.Id
+        };
+    }
+
+    public async Task<object> CreateAdmin(
+        AdminCreateRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.FirstName) ||
+            string.IsNullOrWhiteSpace(request.LastName) ||
+            string.IsNullOrWhiteSpace(request.Email) ||
+            string.IsNullOrWhiteSpace(request.Password))
+        {
+            throw new ArgumentException("All fields are required.");
+        }
+
+        var email = request.Email.Trim();
+
+        if (await _context.Users.AnyAsync(u => u.Email == email))
+            throw new InvalidOperationException("User already exists.");
+
+        var user = new User
+        {
+            FirstName = request.FirstName.Trim(),
+            LastName = request.LastName.Trim(),
+            Email = email,
+            PasswordHash =
+                BCrypt.Net.BCrypt.HashPassword(request.Password),
+            Role = "Admin"
+        };
+
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+
+        return new
+        {
+            user.Id,
+            user.Email,
+            user.FirstName,
+            user.LastName,
+            user.Role
         };
     }
 
@@ -133,8 +147,7 @@ public class AuthService
             throw new UnauthorizedAccessException();
 
         var valid = BCrypt.Net.BCrypt.Verify(
-            request.Password,
-            user.PasswordHash);
+            request.Password, user.PasswordHash);
 
         if (!valid)
             throw new UnauthorizedAccessException();
@@ -155,15 +168,16 @@ public class AuthService
 
     private string GenerateToken(User user)
     {
-        var jwtSettings = _configuration.GetSection("JwtSettings");
+        var jwtSettings =
+            _configuration.GetSection("JwtSettings");
+
         var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
 
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Email),
             new Claim(
-                ClaimTypes.NameIdentifier,
-                user.Id.ToString()),
+                ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(
                 ClaimTypes.Name,
                 $"{user.FirstName} {user.LastName}"),
@@ -181,6 +195,7 @@ public class AuthService
             expires: DateTime.UtcNow.AddHours(2),
             signingCredentials: credentials);
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        return new JwtSecurityTokenHandler()
+            .WriteToken(token);
     }
 }

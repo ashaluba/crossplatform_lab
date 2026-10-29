@@ -28,39 +28,45 @@ public class EmployeeService(AppDbContext context)
         return ToResponse(employee);
     }
 
-    public async Task<EmployeeResponse> Create(EmployeeRequest request)
+    public async Task<EmployeeResponse> Create(
+        EmployeeCreateRequest request)
     {
         Validator.ValidateObject(
             request, new ValidationContext(request), true);
 
-        var user = await context.Users
-    .SingleOrDefaultAsync(u => u.Id == request.UserId);
+        var email = request.Email.Trim();
 
-        if (user == null)
-            throw new ValidationException("The specified user does not exist.");
+        if (await context.Users.AnyAsync(u => u.Email == email))
+            throw new InvalidOperationException("User already exists.");
 
-        if (user.Role != "Employee")
-            throw new ValidationException(
-                "The user must have the Employee role.");
+        var firstName = request.FirstName.Trim();
+        var lastName = request.LastName.Trim();
+        var phone = request.Phone.Trim();
 
-        if (await context.Employees.AnyAsync(e => e.UserId == request.UserId))
+        var user = new User
         {
-            throw new InvalidOperationException(
-                "This user is already linked to an employee.");
-        }
+            FirstName = firstName,
+            LastName = lastName,
+            Email = email,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(
+                request.Password),
+            Role = "Employee"
+        };
 
         var employee = new Employee
         {
-            UserId = request.UserId,
-            FirstName = request.FirstName.Trim(),
-            LastName = request.LastName.Trim(),
-            Phone = request.Phone.Trim()
+            User = user,
+            FirstName = firstName,
+            LastName = lastName,
+            Phone = phone
         };
 
         if (!employee.IsValid())
             throw new ValidationException("Invalid employee data.");
 
+        context.Users.Add(user);
         context.Employees.Add(employee);
+
         await context.SaveChangesAsync();
 
         return ToResponse(employee);
@@ -75,8 +81,16 @@ public class EmployeeService(AppDbContext context)
             .SingleOrDefaultAsync(e => e.Id == id)
             ?? throw new KeyNotFoundException("Employee not found.");
 
-        if (!await context.Users.AnyAsync(u => u.Id == request.UserId))
-            throw new ValidationException("The specified user does not exist.");
+        var user = await context.Users
+            .SingleOrDefaultAsync(u => u.Id == request.UserId);
+
+        if (user == null)
+            throw new ValidationException(
+                "The specified user does not exist.");
+
+        if (user.Role != "Employee")
+            throw new ValidationException(
+                "The user must have the Employee role.");
 
         if (await context.Employees.AnyAsync(
             e => e.UserId == request.UserId && e.Id != id))
@@ -102,7 +116,8 @@ public class EmployeeService(AppDbContext context)
             .SingleOrDefaultAsync(e => e.Id == id)
             ?? throw new KeyNotFoundException("Employee not found.");
 
-        if (await context.Appointments.AnyAsync(a => a.EmployeeId == id))
+        if (await context.Appointments.AnyAsync(
+            a => a.EmployeeId == id))
         {
             throw new InvalidOperationException(
                 "Cannot delete an employee who has appointments. " +
