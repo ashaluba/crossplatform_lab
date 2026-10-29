@@ -1,5 +1,4 @@
-﻿
-using BeautySalonApi.Contracts;
+﻿using BeautySalonApi.Contracts;
 using BeautySalonApi.Data;
 using BeautySalonApi.Models;
 using Microsoft.EntityFrameworkCore;
@@ -175,7 +174,7 @@ public class AuthService
 
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+            new Claim("email", user.Email),
             new Claim(
                 ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(

@@ -16,15 +16,21 @@ public class AppointmentsController(AppointmentService service)
     [HttpGet]
     public async Task<ActionResult<List<AppointmentResponse>>> GetAll()
     {
-        var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
 
-        if (!int.TryParse(userIdValue, out var userId))
-            return Unauthorized();
+        if (userIdClaim == null ||
+            !int.TryParse(userIdClaim.Value, out var userId))
+        {
+            return Unauthorized("User ID is missing or invalid in token.");
+        }
 
         var isAdmin = User.IsInRole("Admin");
         var isEmployee = User.IsInRole("Employee");
 
-        return Ok(await service.GetAll(userId, isAdmin, isEmployee));
+        var appointments = await service.GetAll(
+            userId, isAdmin, isEmployee);
+
+        return Ok(appointments);
     }
 
     [HttpGet("{id:int}")]

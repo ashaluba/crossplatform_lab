@@ -31,12 +31,13 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<Client>(entity =>
         {
-            entity.HasIndex(c => c.UserId).IsUnique();
-
             entity.HasOne(c => c.User)
-                .WithOne()
-                .HasForeignKey<Client>(c => c.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
+        .WithOne()
+        .HasForeignKey<Client>(c => c.UserId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(c => c.UserId)
+                .IsUnique();
         });
 
         modelBuilder.Entity<Employee>(entity =>

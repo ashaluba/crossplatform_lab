@@ -22,42 +22,52 @@ public class ReportService(AppDbContext context)
             .ToListAsync();
     }
 
-    public async Task<List<EmployeesByServiceResponse>>
-        GetEmployeesByService()
+    public async Task<List<EmployeesByServiceResponse>> GetEmployeesByService()
     {
-        return await context.Appointments
+        var appointments = await context.Appointments
             .AsNoTracking()
+            .Include(a => a.Employee)
+            .Include(a => a.Service)
+            .ToListAsync();
+
+        return appointments
             .GroupBy(a => new
             {
-                a.EmployeeId,
-                Employee = a.Employee!.FirstName + " " + a.Employee.LastName,
-                a.ServiceId,
-                Service = a.Service!.ServiceName
+                Employee = a.Employee != null
+                    ? a.Employee.FirstName + " " + a.Employee.LastName
+                    : "Unknown",
+                Service = a.Service != null
+                    ? a.Service.ServiceName
+                    : "Unknown"
             })
             .Select(g => new EmployeesByServiceResponse(
                 g.Key.Employee,
                 g.Key.Service,
                 g.Count()))
             .OrderByDescending(x => x.AppointmentsCount)
-            .ToListAsync();
+            .ToList();
     }
 
     public async Task<List<ClientsByAppointmentsResponse>>
-        GetClientsByAppointments()
+    GetClientsByAppointments()
     {
-        return await context.Appointments
+        var appointments = await context.Appointments
             .AsNoTracking()
+            .Include(a => a.Client)
+            .ToListAsync();
+
+        return appointments
             .GroupBy(a => new
             {
-                a.ClientId,
-                a.Client!.FirstName,
-                a.Client.LastName
+                Client = a.Client != null
+                    ? a.Client.FirstName + " " + a.Client.LastName
+                    : "Unknown"
             })
             .Select(g => new ClientsByAppointmentsResponse(
-                g.Key.FirstName + " " + g.Key.LastName,
+                g.Key.Client,
                 g.Count()))
             .OrderByDescending(x => x.AppointmentsCount)
-            .ToListAsync();
+            .ToList();
     }
 
     public async Task<List<ServicesSummaryResponse>> GetServicesSummary()
