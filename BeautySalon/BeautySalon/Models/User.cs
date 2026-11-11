@@ -9,3 +9,4 @@ public class User
     public string LastName { get; set; } = "";
     public string Role { get; set; } = "Client";
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+}

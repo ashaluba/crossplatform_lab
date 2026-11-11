@@ -71,17 +71,19 @@ public class ClientService(AppDbContext context)
     public async Task Delete(int id)
     {
         var client = await context.Clients
+            .Include(c => c.User)
             .SingleOrDefaultAsync(c => c.Id == id)
             ?? throw new KeyNotFoundException("Client not found.");
 
-        if (await context.Appointments.AnyAsync(a => a.ClientId == id))
-        {
-            throw new InvalidOperationException(
-                "Cannot delete a client who has appointments. " +
-                "Delete the appointments first.");
-        }
+        var user = client.User;
 
         context.Clients.Remove(client);
+
+        if (user != null)
+        {
+            context.Users.Remove(user);
+        }
+
         await context.SaveChangesAsync();
     }
 

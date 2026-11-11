@@ -112,18 +112,28 @@ public class EmployeeService(AppDbContext context)
     public async Task Delete(int id)
     {
         var employee = await context.Employees
+            .Include(e => e.User)
             .SingleOrDefaultAsync(e => e.Id == id)
             ?? throw new KeyNotFoundException("Employee not found.");
 
-        if (await context.Appointments.AnyAsync(
-            a => a.EmployeeId == id))
+        bool hasAppointments = await context.Appointments
+            .AnyAsync(a => a.EmployeeId == id);
+
+        if (hasAppointments)
         {
             throw new InvalidOperationException(
-                "Cannot delete an employee who has appointments. " +
-                "Delete the appointments first.");
+                "Cannot delete an employee who has appointments. Delete the appointments first.");
         }
 
+        var user = employee.User;
+
         context.Employees.Remove(employee);
+
+        if (user != null)
+        {
+            context.Users.Remove(user);
+        }
+
         await context.SaveChangesAsync();
     }
 
