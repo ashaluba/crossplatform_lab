@@ -7,14 +7,9 @@ public class Client
     public int? UserId { get; set; }
     public User? User { get; set; }
 
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-    public string Phone { get; set; } = string.Empty;
-
-    public string GetFullName()
-    {
-        return $"{FirstName} {LastName}".Trim();
-    }
+    public string FirstName { get; set; } = "";
+    public string LastName { get; set; } = "";
+    public string Phone { get; set; } = "";
 
     public bool IsValid()
     {

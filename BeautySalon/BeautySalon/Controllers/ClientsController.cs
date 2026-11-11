@@ -8,7 +8,6 @@ namespace BeautySalonApi.Controllers;
 
 [ApiController]
 [Route("api/clients")]
-[Authorize]
 public class ClientsController(ClientService service) : ControllerBase
 {
     [HttpGet]

@@ -64,7 +64,6 @@ public class EmployeeService(AppDbContext context)
         if (!employee.IsValid())
             throw new ValidationException("Invalid employee data.");
 
-        context.Users.Add(user);
         context.Employees.Add(employee);
 
         await context.SaveChangesAsync();

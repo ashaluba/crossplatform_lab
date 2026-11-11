@@ -8,19 +8,15 @@ namespace BeautySalonApi.Services;
 
 public class AppointmentService(AppDbContext context)
 {
-    private IQueryable<Appointment> QueryWithDetails()
+    private IQueryable<Appointment> Query()
     {
-        return context.Appointments
-            .AsNoTracking()
-            .Include(a => a.Client)
-            .Include(a => a.Employee)
-            .Include(a => a.Service);
+        return context.Appointments;
     }
 
     public async Task<List<AppointmentResponse>> GetAll(
     int userId, bool isAdmin, bool isEmployee)
     {
-        var query = QueryWithDetails();
+        var query = Query();
 
         if (!isAdmin && isEmployee)
         {
@@ -61,7 +57,7 @@ public class AppointmentService(AppDbContext context)
     public async Task<AppointmentResponse> GetById(
     int id, int userId, bool isAdmin, bool isEmployee)
     {
-        var query = QueryWithDetails()
+        var query = Query()
             .Where(a => a.Id == id);
 
         if (!isAdmin && isEmployee)
@@ -170,11 +166,27 @@ public class AppointmentService(AppDbContext context)
         await context.SaveChangesAsync();
     }
 
+
     private static void Validate(AppointmentRequest request)
     {
         Validator.ValidateObject(
             request, new ValidationContext(request), true);
+
+        string[] allowedStatuses =
+        [
+            "Scheduled",
+        "Completed",
+        "Cancelled"
+        ];
+
+        if (!allowedStatuses.Contains(request.Status?.Trim()))
+        {
+            throw new ValidationException(
+                "Invalid appointment status. Allowed statuses: " +
+                string.Join(", ", allowedStatuses));
+        }
     }
+
 
     private async Task EnsureReferencesExist(AppointmentRequest request)
     {
@@ -194,6 +206,7 @@ public class AppointmentService(AppDbContext context)
         var appointments = await context.Appointments
             .AsNoTracking()
             .Where(a => a.EmployeeId == request.EmployeeId)
+            .Where(a => a.Status != "Cancelled")
             .Where(a => excludeAppointmentId == null ||
                         a.Id != excludeAppointmentId.Value)
             .Select(a => new

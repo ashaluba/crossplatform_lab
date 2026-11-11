@@ -34,16 +34,6 @@ public class AuthService
                 "All registration fields are required.");
         }
 
-        var role = request.Role.Trim();
-
-        if (!role.Equals("Client",
-                StringComparison.OrdinalIgnoreCase))
-        {
-            throw new ArgumentException(
-                "Public registration is available only for clients.");
-        }
-
-        role = "Client";
         var email = request.Email.Trim();
 
         if (await _context.Users.AnyAsync(u => u.Email == email))
@@ -60,10 +50,8 @@ public class AuthService
             Email = email,
             PasswordHash =
                 BCrypt.Net.BCrypt.HashPassword(request.Password),
-            Role = role
+            Role = "Client"
         };
-
-        _context.Users.Add(user);
 
         var client = new Client
         {

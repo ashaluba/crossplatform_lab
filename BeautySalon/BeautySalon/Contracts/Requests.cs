@@ -5,49 +5,46 @@ namespace BeautySalonApi.Contracts;
 public class RegisterRequest
 {
     [Required, MaxLength(100)]
-    public string FirstName { get; init; } = string.Empty;
+    public string FirstName { get; init; } = "";
 
     [Required, MaxLength(100)]
-    public string LastName { get; init; } = string.Empty;
+    public string LastName { get; init; } = "";
 
     [Required, EmailAddress]
-    public string Email { get; init; } = string.Empty;
+    public string Email { get; init; } = "";
 
     [Required, MinLength(8)]
-    public string Password { get; init; } = string.Empty;
-
-    [Required]
-    public string Role { get; init; } = "Client";
+    public string Password { get; init; } = "";
 
     [Required, MaxLength(20)]
-    public string Phone { get; init; } = string.Empty;
+    public string Phone { get; init; } = "";
 }
 
 public class LoginRequest
 {
     [Required, EmailAddress]
-    public string Email { get; init; } = string.Empty;
+    public string Email { get; init; } = "";
 
     [Required]
-    public string Password { get; init; } = string.Empty;
+    public string Password { get; init; } = "";
 }
 
 public class EmployeeCreateRequest
 {
     [Required, MaxLength(100)]
-    public string FirstName { get; init; } = string.Empty;
+    public string FirstName { get; init; } = "";
 
     [Required, MaxLength(100)]
-    public string LastName { get; init; } = string.Empty;
+    public string LastName { get; init; } = "";
 
     [Required, EmailAddress]
-    public string Email { get; init; } = string.Empty;
+    public string Email { get; init; } = "";
 
     [Required, MinLength(8)]
-    public string Password { get; init; } = string.Empty;
+    public string Password { get; init; } = "";
 
     [Required, MaxLength(20)]
-    public string Phone { get; init; } = string.Empty;
+    public string Phone { get; init; } = "";
 }
 
 public class EmployeeRequest
@@ -56,31 +53,31 @@ public class EmployeeRequest
     public int UserId { get; init; }
 
     [Required, MaxLength(100)]
-    public string FirstName { get; init; } = string.Empty;
+    public string FirstName { get; init; } = "";
 
     [Required, MaxLength(100)]
-    public string LastName { get; init; } = string.Empty;
+    public string LastName { get; init; } = "";
 
     [Required, MaxLength(20)]
-    public string Phone { get; init; } = string.Empty;
+    public string Phone { get; init; } = "";
 }
 
 public class ClientRequest
 {
     [Required, MaxLength(100)]
-    public string FirstName { get; init; } = string.Empty;
+    public string FirstName { get; init; } = "";
 
     [Required, MaxLength(100)]
-    public string LastName { get; init; } = string.Empty;
+    public string LastName { get; init; } = "";
 
     [Required, MaxLength(20)]
-    public string Phone { get; init; } = string.Empty;
+    public string Phone { get; init; } = "";
 }
 
 public class ServiceRequest
 {
     [Required, MaxLength(150)]
-    public string ServiceName { get; init; } = string.Empty;
+    public string ServiceName { get; init; } = "";
 
     [Range(typeof(decimal), "0", "99999999.99",
         ParseLimitsInInvariantCulture = true,

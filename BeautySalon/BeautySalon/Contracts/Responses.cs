@@ -1,17 +1,5 @@
 ﻿namespace BeautySalonApi.Contracts;
 
-public record UserResponse(
-    int Id,
-    string Email,
-    string FirstName,
-    string LastName,
-    string Role);
-
-public record AuthResponse(
-    string Token,
-    DateTimeOffset ExpiresAt,
-    UserResponse User);
-
 public record ClientResponse(
     int Id,
     string FirstName,
