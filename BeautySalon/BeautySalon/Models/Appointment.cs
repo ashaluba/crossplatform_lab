@@ -20,7 +20,8 @@ public class Appointment
         return ClientId > 0 &&
                EmployeeId > 0 &&
                ServiceId > 0 &&
+               DateTime != default &&
                Duration > 0 &&
-               DateTime > DateTime.UtcNow;
+               Price >= 0;
     }
 }

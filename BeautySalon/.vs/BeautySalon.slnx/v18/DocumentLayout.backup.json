@@ -58,8 +58,7 @@
               "RelativeToolTip": "BeautySalon\\Models\\User.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAwAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-11-11T19:54:30.782Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-11-11T19:54:30.782Z"
             },
             {
               "$type": "Document",
@@ -71,8 +70,7 @@
               "RelativeToolTip": "BeautySalon\\Models\\Employee.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-11-11T19:54:23.133Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-11-11T19:54:23.133Z"
             },
             {
               "$type": "Document",
@@ -84,8 +82,7 @@
               "RelativeToolTip": "BeautySalon\\Models\\Client.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-11-11T19:54:16.811Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-11-11T19:54:16.811Z"
             },
             {
               "$type": "Document",
@@ -109,8 +106,7 @@
               "RelativeToolTip": "BeautySalon\\Services\\ClientService.cs",
               "ViewState": "AgIAAEMAAAAAAAAAAAAkwFcAAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-11-11T19:09:22.294Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-11-11T19:09:22.294Z"
             },
             {
               "$type": "Document",
@@ -135,8 +131,7 @@
               "RelativeToolTip": "BeautySalon\\Services\\AuthService.cs",
               "ViewState": "AgIAAKwAAAAAAAAAAAAwwK4AAAAqAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-11-11T19:09:20.204Z",
-              "EditorCaption": ""
+              "WhenOpened": "2026-11-11T19:09:20.204Z"
             }
           ]
         },

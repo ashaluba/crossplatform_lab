@@ -77,31 +77,23 @@ public class EmployeeService(AppDbContext context)
             request, new ValidationContext(request), true);
 
         var employee = await context.Employees
+            .Include(e => e.User)
             .SingleOrDefaultAsync(e => e.Id == id)
             ?? throw new KeyNotFoundException("Employee not found.");
 
-        var user = await context.Users
-            .SingleOrDefaultAsync(u => u.Id == request.UserId);
+        var firstName = request.FirstName.Trim();
+        var lastName = request.LastName.Trim();
+        var phone = request.Phone.Trim();
 
-        if (user == null)
-            throw new ValidationException(
-                "The specified user does not exist.");
+        employee.FirstName = firstName;
+        employee.LastName = lastName;
+        employee.Phone = phone;
 
-        if (user.Role != "Employee")
-            throw new ValidationException(
-                "The user must have the Employee role.");
-
-        if (await context.Employees.AnyAsync(
-            e => e.UserId == request.UserId && e.Id != id))
+        if (employee.User != null)
         {
-            throw new InvalidOperationException(
-                "This user is already linked to another employee.");
+            employee.User.FirstName = firstName;
+            employee.User.LastName = lastName;
         }
-
-        employee.UserId = request.UserId;
-        employee.FirstName = request.FirstName.Trim();
-        employee.LastName = request.LastName.Trim();
-        employee.Phone = request.Phone.Trim();
 
         if (!employee.IsValid())
             throw new ValidationException("Invalid employee data.");

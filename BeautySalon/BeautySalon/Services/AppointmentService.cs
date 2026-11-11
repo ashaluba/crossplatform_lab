@@ -10,11 +10,11 @@ public class AppointmentService(AppDbContext context)
 {
     private IQueryable<Appointment> Query()
     {
-        return context.Appointments;
+        return context.Appointments.AsNoTracking();
     }
 
     public async Task<List<AppointmentResponse>> GetAll(
-    int userId, bool isAdmin, bool isEmployee)
+        int userId, bool isAdmin, bool isEmployee)
     {
         var query = Query();
 
@@ -55,7 +55,7 @@ public class AppointmentService(AppDbContext context)
     }
 
     public async Task<AppointmentResponse> GetById(
-    int id, int userId, bool isAdmin, bool isEmployee)
+        int id, int userId, bool isAdmin, bool isEmployee)
     {
         var query = Query()
             .Where(a => a.Id == id);
@@ -98,9 +98,19 @@ public class AppointmentService(AppDbContext context)
             ?? throw new KeyNotFoundException("Appointment not found.");
     }
 
-    public async Task<AppointmentResponse> Create(AppointmentRequest request)
+    public async Task<AppointmentResponse> Create(
+        AppointmentRequest request)
     {
         Validate(request);
+
+        if (request.Status.Trim() != "Scheduled")
+        {
+            throw new ValidationException(
+                "A new appointment must have Scheduled status.");
+        }
+
+        EnsureFutureDate(request.DateTime);
+
         await EnsureReferencesExist(request);
         await EnsureNoOverlap(request);
 
@@ -118,8 +128,7 @@ public class AppointmentService(AppDbContext context)
         if (!appointment.IsValid())
         {
             throw new ValidationException(
-                "Invalid appointment data. Date must be in the future " +
-                "and duration must be positive.");
+                "Invalid appointment data. Check IDs, duration and price.");
         }
 
         context.Appointments.Add(appointment);
@@ -131,12 +140,24 @@ public class AppointmentService(AppDbContext context)
     public async Task Update(int id, AppointmentRequest request)
     {
         Validate(request);
-        await EnsureReferencesExist(request);
-        await EnsureNoOverlap(request, id);
 
         var appointment = await context.Appointments
             .SingleOrDefaultAsync(a => a.Id == id)
             ?? throw new KeyNotFoundException("Appointment not found.");
+
+        await EnsureReferencesExist(request);
+
+        var status = request.Status.Trim();
+
+        if (status == "Scheduled")
+        {
+            EnsureFutureDate(request.DateTime);
+            await EnsureNoOverlap(request, id);
+        }
+        else if (status == "Completed")
+        {
+            EnsureCompletedDate(request.DateTime, request.Duration);
+        }
 
         appointment.ClientId = request.ClientId;
         appointment.EmployeeId = request.EmployeeId;
@@ -149,8 +170,7 @@ public class AppointmentService(AppDbContext context)
         if (!appointment.IsValid())
         {
             throw new ValidationException(
-                "Invalid appointment data. Date must be in the future " +
-                "and duration must be positive.");
+                "Invalid appointment data. Check IDs, duration and price.");
         }
 
         await context.SaveChangesAsync();
@@ -166,7 +186,6 @@ public class AppointmentService(AppDbContext context)
         await context.SaveChangesAsync();
     }
 
-
     private static void Validate(AppointmentRequest request)
     {
         Validator.ValidateObject(
@@ -175,11 +194,13 @@ public class AppointmentService(AppDbContext context)
         string[] allowedStatuses =
         [
             "Scheduled",
-        "Completed",
-        "Cancelled"
+            "Completed",
+            "Cancelled"
         ];
 
-        if (!allowedStatuses.Contains(request.Status?.Trim()))
+        var status = request.Status?.Trim() ?? "";
+
+        if (!allowedStatuses.Contains(status))
         {
             throw new ValidationException(
                 "Invalid appointment status. Allowed statuses: " +
@@ -187,30 +208,60 @@ public class AppointmentService(AppDbContext context)
         }
     }
 
+    private static void EnsureFutureDate(DateTime dateTime)
+    {
+        if (dateTime <= DateTime.Now)
+        {
+            throw new ValidationException(
+                "The appointment date must be in the future.");
+        }
+    }
+
+    private static void EnsureCompletedDate(
+    DateTime dateTime, int duration)
+    {
+        var endDateTime = dateTime.AddMinutes(duration);
+
+        if (endDateTime > DateTime.UtcNow)
+        {
+            throw new ValidationException(
+                "An appointment cannot be completed before its end time.");
+        }
+    }
 
     private async Task EnsureReferencesExist(AppointmentRequest request)
     {
         if (!await context.Clients.AnyAsync(c => c.Id == request.ClientId))
-            throw new ValidationException("The specified client does not exist.");
+            throw new ValidationException(
+                "The specified client does not exist.");
 
         if (!await context.Employees.AnyAsync(e => e.Id == request.EmployeeId))
-            throw new ValidationException("The specified employee does not exist.");
+            throw new ValidationException(
+                "The specified employee does not exist.");
 
         if (!await context.Services.AnyAsync(s => s.Id == request.ServiceId))
-            throw new ValidationException("The specified service does not exist.");
+            throw new ValidationException(
+                "The specified service does not exist.");
     }
+
+
     private async Task EnsureNoOverlap(
-    AppointmentRequest request,
-    int? excludeAppointmentId = null)
+        AppointmentRequest request,
+        int? excludeAppointmentId = null)
     {
         var appointments = await context.Appointments
             .AsNoTracking()
-            .Where(a => a.EmployeeId == request.EmployeeId)
-            .Where(a => a.Status != "Cancelled")
-            .Where(a => excludeAppointmentId == null ||
-                        a.Id != excludeAppointmentId.Value)
+            .Where(a => a.Status == "Scheduled")
+            .Where(a =>
+                a.EmployeeId == request.EmployeeId ||
+                a.ClientId == request.ClientId)
+            .Where(a =>
+                excludeAppointmentId == null ||
+                a.Id != excludeAppointmentId.Value)
             .Select(a => new
             {
+                a.EmployeeId,
+                a.ClientId,
                 a.DateTime,
                 a.Duration
             })
@@ -222,12 +273,26 @@ public class AppointmentService(AppDbContext context)
         foreach (var appointment in appointments)
         {
             var existingStart = appointment.DateTime;
-            var existingEnd = existingStart.AddMinutes(appointment.Duration);
+            var existingEnd = existingStart.AddMinutes(
+                appointment.Duration);
 
-            if (newStart < existingEnd && newEnd > existingStart)
+            bool timeOverlaps =
+                newStart < existingEnd &&
+                newEnd > existingStart;
+
+            if (!timeOverlaps)
+                continue;
+
+            if (appointment.EmployeeId == request.EmployeeId)
             {
                 throw new ValidationException(
                     "The employee already has an appointment at this time.");
+            }
+
+            if (appointment.ClientId == request.ClientId)
+            {
+                throw new ValidationException(
+                    "The client already has an appointment at this time.");
             }
         }
     }

@@ -49,8 +49,6 @@ public class EmployeeCreateRequest
 
 public class EmployeeRequest
 {
-    [Range(1, int.MaxValue)]
-    public int UserId { get; init; }
 
     [Required, MaxLength(100)]
     public string FirstName { get; init; } = "";

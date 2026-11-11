@@ -55,12 +55,23 @@ public class ClientService(AppDbContext context)
             request, new ValidationContext(request), true);
 
         var client = await context.Clients
+            .Include(c => c.User)
             .SingleOrDefaultAsync(c => c.Id == id)
             ?? throw new KeyNotFoundException("Client not found.");
 
-        client.FirstName = request.FirstName.Trim();
-        client.LastName = request.LastName.Trim();
-        client.Phone = request.Phone.Trim();
+        var firstName = request.FirstName.Trim();
+        var lastName = request.LastName.Trim();
+        var phone = request.Phone.Trim();
+
+        client.FirstName = firstName;
+        client.LastName = lastName;
+        client.Phone = phone;
+
+        if (client.User != null)
+        {
+            client.User.FirstName = firstName;
+            client.User.LastName = lastName;
+        }
 
         if (!client.IsValid())
             throw new ValidationException("Invalid client data.");
@@ -74,6 +85,15 @@ public class ClientService(AppDbContext context)
             .Include(c => c.User)
             .SingleOrDefaultAsync(c => c.Id == id)
             ?? throw new KeyNotFoundException("Client not found.");
+
+        bool hasAppointments = await context.Appointments
+            .AnyAsync(a => a.ClientId == id);
+
+        if (hasAppointments)
+        {
+            throw new InvalidOperationException(
+                "Cannot delete a client who has appointments. Delete the appointments first.");
+        }
 
         var user = client.User;
 
